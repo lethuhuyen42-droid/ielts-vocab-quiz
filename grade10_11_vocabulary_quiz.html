@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Word Explorer Quiz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FFF4DE;
+    --card: #FFFFFF;
+    --ink: #2B2D42;
+    --coral: #FF6B6B;
+    --teal: #21B0A8;
+    --gold: #FFC93C;
+    --violet: #7B6EF6;
+    --leaf: #4CB963;
+    --line: #2B2D42;
+    --shadow: 6px 6px 0 var(--line);
+    --shadow-sm: 4px 4px 0 var(--line);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg: #23213A;
+      --card: #2F2D4C;
+      --ink: #F5F2FF;
+      --line: #F5F2FF;
+      --shadow: 6px 6px 0 var(--line);
+      --shadow-sm: 4px 4px 0 var(--line);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg: #23213A;
+    --card: #2F2D4C;
+    --ink: #F5F2FF;
+    --line: #F5F2FF;
+    --shadow: 6px 6px 0 var(--line);
+    --shadow-sm: 4px 4px 0 var(--line);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Nunito', sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:flex-start;
+    padding:32px 16px 60px;
+  }
+  .wrap{
+    width:100%;
+    max-width:640px;
+  }
+  h1, h2, h3, .headline{
+    font-family:'Baloo 2', sans-serif;
+  }
+  .top-title{
+    text-align:center;
+    font-size:clamp(28px, 6vw, 40px);
+    font-weight:800;
+    margin:0 0 6px;
+    color:var(--violet);
+    line-height:1.1;
+  }
+  .top-sub{
+    text-align:center;
+    font-size:15px;
+    font-weight:700;
+    color:var(--ink);
+    opacity:0.75;
+    margin:0 0 26px;
+  }
+  .card{
+    background:var(--card);
+    border:3px solid var(--line);
+    border-radius:22px;
+    box-shadow:var(--shadow);
+    padding:28px 24px 26px;
+  }
+  .progress-row{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:18px;
+    gap:12px;
+  }
+  .progress-track{
+    flex:1;
+    height:14px;
+    background:var(--bg);
+    border:2px solid var(--line);
+    border-radius:10px;
+    overflow:hidden;
+  }
+  .progress-fill{
+    height:100%;
+    background:var(--gold);
+    width:0%;
+    transition:width 0.35s ease;
+  }
+  .progress-label{
+    font-weight:800;
+    font-size:14px;
+    white-space:nowrap;
+  }
+  .score-chip{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    background:var(--leaf);
+    color:#fff;
+    border:2px solid var(--line);
+    border-radius:999px;
+    padding:4px 12px;
+    font-weight:800;
+    font-size:13px;
+  }
+  .topic-tag{
+    display:inline-block;
+    background:var(--gold);
+    border:2px solid var(--line);
+    border-radius:999px;
+    padding:4px 14px;
+    font-weight:800;
+    font-size:12.5px;
+    margin-bottom:14px;
+    color:var(--ink);
+  }
+  .word-type-tag{
+    display:inline-block;
+    background:var(--teal);
+    color:#fff;
+    border:2px solid var(--line);
+    border-radius:999px;
+    padding:3px 12px;
+    font-weight:800;
+    font-size:11.5px;
+    margin-bottom:14px;
+    margin-left:8px;
+  }
+  .question{
+    font-size:clamp(19px, 4.4vw, 23px);
+    font-weight:800;
+    line-height:1.35;
+    margin:0 0 6px;
+  }
+  .question .vn{
+    color:var(--coral);
+  }
+  .question-help{
+    font-size:14px;
+    font-weight:700;
+    opacity:0.65;
+    margin:0 0 20px;
+  }
+  .answer-row{
+    display:flex;
+    gap:12px;
+    flex-wrap:wrap;
+  }
+  .answer-input{
+    flex:1;
+    min-width:180px;
+    font-family:'Nunito', sans-serif;
+    font-size:17px;
+    font-weight:800;
+    padding:14px 16px;
+    border-radius:16px;
+    border:3px solid var(--line);
+    background:#FFF8DE;
+    color:var(--ink);
+    box-shadow:var(--shadow-sm);
+  }
+  .answer-input:focus{
+    outline:none;
+    background:#EAF3FF;
+  }
+  .answer-input:disabled{
+    opacity:0.75;
+  }
+  .answer-input.correct{
+    background:var(--leaf) !important;
+    color:#fff;
+    border-color:var(--line);
+  }
+  .answer-input.wrong{
+    background:var(--coral) !important;
+    color:#fff;
+    border-color:var(--line);
+  }
+  .check-btn{
+    font-family:'Baloo 2', sans-serif;
+    font-size:17px;
+    font-weight:700;
+    padding:14px 22px;
+    border-radius:16px;
+    border:3px solid var(--line);
+    background:var(--teal);
+    color:#fff;
+    box-shadow:var(--shadow-sm);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .check-btn:hover:not(:disabled){
+    transform:translate(-2px,-2px);
+    box-shadow:8px 8px 0 var(--line);
+  }
+  .check-btn:active:not(:disabled){
+    transform:translate(0,0);
+    box-shadow:2px 2px 0 var(--line);
+  }
+  .check-btn:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+  }
+  .correct-answer-reveal{
+    font-size:14.5px;
+    font-weight:700;
+    margin:10px 0 0;
+    min-height:20px;
+    opacity:0.8;
+  }
+  .feedback{
+    margin-top:10px;
+    min-height:34px;
+    font-weight:800;
+    font-size:16px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .feedback.correct{ color:var(--leaf); }
+  .feedback.wrong{ color:var(--coral); }
+  .next-btn{
+    margin-top:16px;
+    width:100%;
+    font-family:'Baloo 2', sans-serif;
+    font-size:18px;
+    font-weight:700;
+    padding:14px;
+    border-radius:16px;
+    border:3px solid var(--line);
+    background:var(--violet);
+    color:#fff;
+    box-shadow:var(--shadow-sm);
+    cursor:pointer;
+  }
+  .next-btn:hover{
+    transform:translate(-2px,-2px);
+    box-shadow:8px 8px 0 var(--line);
+  }
+  .next-btn:active{
+    transform:translate(0,0);
+    box-shadow:2px 2px 0 var(--line);
+  }
+  .next-btn:disabled{
+    opacity:0.4;
+    cursor:not-allowed;
+    box-shadow:var(--shadow-sm);
+    transform:none;
+  }
+  .start-screen, .end-screen{
+    text-align:center;
+  }
+  .start-screen p, .end-screen p{
+    font-size:15.5px;
+    line-height:1.6;
+    font-weight:700;
+    opacity:0.85;
+  }
+  .big-badge{
+    display:inline-block;
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    background:var(--gold);
+    border:3px solid var(--line);
+    margin:0 auto 18px;
+  }
+  .level-legend{
+    text-align:left;
+    background:var(--bg);
+    border:2px solid var(--line);
+    border-radius:14px;
+    padding:14px 18px;
+    margin:18px 0 22px;
+    font-size:14px;
+    font-weight:700;
+  }
+  .level-legend div{
+    padding:3px 0;
+  }
+  .result-score{
+    font-family:'Baloo 2', sans-serif;
+    font-size:52px;
+    font-weight:800;
+    color:var(--violet);
+    margin:10px 0 4px;
+  }
+  .result-caption{
+    font-weight:800;
+    font-size:16px;
+    margin-bottom:22px;
+  }
+  .topic-breakdown{
+    text-align:left;
+    background:var(--bg);
+    border:2px solid var(--line);
+    border-radius:14px;
+    padding:14px 16px;
+    margin-bottom:20px;
+  }
+  .topic-breakdown div{
+    display:flex;
+    justify-content:space-between;
+    font-size:14.5px;
+    font-weight:800;
+    padding:5px 0;
+  }
+  .sound-toggle{
+    display:flex;
+    justify-content:center;
+    margin-top:14px;
+  }
+  .sound-toggle label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-weight:800;
+    font-size:13.5px;
+    opacity:0.8;
+    cursor:pointer;
+  }
+  .name-bar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    background:var(--violet);
+    color:#fff;
+    border:2px solid var(--line);
+    border-radius:14px;
+    padding:8px 14px;
+    margin-bottom:16px;
+    font-weight:800;
+    font-size:13.5px;
+  }
+  .name-bar span.name-value{
+    font-family:'Baloo 2', sans-serif;
+    font-size:15px;
+  }
+  .name-input-row{
+    text-align:left;
+    margin-bottom:18px;
+  }
+  .name-input-row label{
+    display:block;
+    font-weight:800;
+    font-size:13.5px;
+    margin-bottom:8px;
+  }
+  .name-input{
+    width:100%;
+    font-family:'Nunito', sans-serif;
+    font-size:16px;
+    font-weight:800;
+    padding:13px 16px;
+    border-radius:16px;
+    border:3px solid var(--line);
+    background:#FFF8DE;
+    color:var(--ink);
+    box-shadow:var(--shadow-sm);
+  }
+  .name-input:focus{
+    outline:none;
+    background:#EAF3FF;
+  }
+  .review-section{
+    text-align:left;
+    margin-top:4px;
+  }
+  .review-title{
+    font-family:'Baloo 2', sans-serif;
+    font-weight:700;
+    font-size:18px;
+    margin:4px 0 12px;
+  }
+  .review-item{
+    background:var(--bg);
+    border:2px solid var(--line);
+    border-radius:14px;
+    padding:12px 16px;
+    margin-bottom:10px;
+  }
+  .review-vn{
+    font-weight:800;
+    font-size:14.5px;
+    margin-bottom:6px;
+  }
+  .review-answers{
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+    font-size:13.5px;
+    font-weight:700;
+  }
+  .review-answers .your-answer{
+    color:var(--coral);
+  }
+  .review-answers .correct-answer{
+    color:var(--leaf);
+  }
+  .review-empty{
+    text-align:center;
+    font-weight:800;
+    font-size:14.5px;
+    opacity:0.75;
+    margin:6px 0 18px;
+  }
+  .footer-note{
+    text-align:center;
+    font-size:12.5px;
+    font-weight:700;
+    opacity:0.55;
+    margin-top:22px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="top-title">Word Explorer Quiz</h1>
+  <p class="top-sub">Grade 10 and 11 vocabulary practice, Day 13 word list</p>
+
+  <div class="card" id="cardArea">
+    <div class="start-screen" id="startScreen">
+      <div class="big-badge"></div>
+      <h2 style="margin:0 0 10px; font-size:24px;">Ready to play</h2>
+      <p>You will see a word type and a Vietnamese meaning, then type the matching English word. Small spelling slips are still accepted, but the word must be close to correct. Answer all 64 questions and see your final score at the end.</p>
+      <div class="name-input-row">
+        <label for="nameInput">Your name</label>
+        <input type="text" id="nameInput" class="name-input" placeholder="Type your name here" autocomplete="off">
+      </div>
+      <div class="level-legend">
+        <div>n means noun, v means verb, adj means adjective</div>
+        <div>phr means phrase, adj/n means the word can be both</div>
+      </div>
+      <button class="next-btn" id="startBtn">Start the quiz</button>
+      <div class="sound-toggle">
+        <label>
+          <input type="checkbox" id="soundCheck" checked>
+          Play sound effects
+        </label>
+      </div>
+    </div>
+
+    <div id="quizScreen" style="display:none;">
+      <div class="name-bar">
+        <span>Student</span>
+        <span class="name-value" id="quizNameValue">Guest</span>
+      </div>
+      <div class="progress-row">
+        <span class="progress-label" id="questionCount">Question 1 of 64</span>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <span class="score-chip" id="scoreChip">Score 0</span>
+      </div>
+      <span class="topic-tag" id="topicTag">Level B1</span>
+      <span class="word-type-tag" id="wordTypeTag">adj</span>
+      <p class="question" id="questionText"></p>
+      <p class="question-help">Type the correct English word, then press Check answer</p>
+      <div class="answer-row">
+        <input type="text" id="answerInput" class="answer-input" placeholder="Type your answer here" autocomplete="off" autocapitalize="off" spellcheck="false">
+        <button class="check-btn" id="checkBtn">Check answer</button>
+      </div>
+      <p class="correct-answer-reveal" id="correctAnswerReveal"></p>
+      <p class="feedback" id="feedbackText"></p>
+      <button class="next-btn" id="nextBtn" disabled>Next question</button>
+    </div>
+
+    <div class="end-screen" id="endScreen" style="display:none;">
+      <div class="name-bar">
+        <span>Student</span>
+        <span class="name-value" id="endNameValue">Guest</span>
+      </div>
+      <h2 style="margin:0 0 4px; font-size:24px;">Quiz complete</h2>
+      <p class="result-score" id="finalScore">0 / 64</p>
+      <p class="result-caption" id="finalMessage"></p>
+      <div class="topic-breakdown" id="topicBreakdown"></div>
+      <div class="review-section" id="reviewSection"></div>
+      <button class="next-btn" id="restartBtn">Play again</button>
+    </div>
+  </div>
+
+  <p class="footer-note">Meanings are shown in Vietnamese, exactly as taught in class</p>
+</div>
+
+<script>
+(function(){
+
+  var QUESTIONS = [
+    {topic:"Level B1", type:"n", vn:"sâu bọ, sinh vật gây hại", answer:"pest"},
+    {topic:"Level B2", type:"n", vn:"thuốc trừ sâu", answer:"pesticide"},
+    {topic:"Level B2", type:"adj", vn:"bẩm sinh", answer:"innate"},
+    {topic:"Level B2", type:"n", vn:"sự miễn dịch", answer:"immunity"},
+    {topic:"Level B2", type:"n", vn:"hệ miễn dịch", answer:"immune system"},
+    {topic:"Level B2", type:"adj", vn:"to lớn, ghê gớm", answer:"tremendous"},
+    {topic:"Level B2", type:"v", vn:"phối giống, nhân giống", answer:"breed"},
+    {topic:"Level B1", type:"adj or n", vn:"tiềm năng", answer:"potential"},
+    {topic:"Level B2", type:"v", vn:"chịu đựng, chống chịu", answer:"withstand"},
+    {topic:"Level B2", type:"n", vn:"con cái, hậu duệ", answer:"offspring"},
+    {topic:"Level B2", type:"v", vn:"chịu đựng, hoặc sinh con", answer:"bear"},
+    {topic:"Level B2", type:"adj", vn:"vốn có, tích hợp sẵn", answer:"built-in"},
+    {topic:"Level B2", type:"n", vn:"sự phân loại", answer:"classification"},
+    {topic:"Level A2", type:"v", vn:"chứa", answer:"contain"},
+    {topic:"Level B1", type:"v", vn:"khao khát, mong muốn", answer:"desire"},
+    {topic:"Level B2", type:"adj", vn:"đáng mong muốn, cần có", answer:"desirable"},
+    {topic:"Level B1", type:"v", vn:"quyết định, xác định", answer:"determine"},
+    {topic:"Level B2", type:"n", vn:"sự quyết tâm", answer:"determination"},
+    {topic:"Level B2", type:"adj", vn:"quyết tâm, kiên quyết", answer:"determined"},
+    {topic:"Level B2", type:"adj", vn:"truyền thống, theo quy ước", answer:"conventional"},
+    {topic:"Level A2", type:"adj", vn:"truyền thống", answer:"traditional"},
+    {topic:"Level B2", type:"v", vn:"kích thích, thúc đẩy", answer:"stimulate"},
+    {topic:"Level B1", type:"v", vn:"thúc đẩy, tạo động lực", answer:"motivate"},
+    {topic:"Level B1", type:"v", vn:"gợi nhớ lại", answer:"recall"},
+    {topic:"Level B1", type:"adj", vn:"gián tiếp", answer:"indirect"},
+    {topic:"Level B2", type:"v", vn:"làm sập, lật đổ", answer:"topple"},
+    {topic:"Level B2", type:"v", vn:"nâng lên", answer:"elevate"},
+    {topic:"Level A2", type:"n", vn:"căn hộ", answer:"flat"},
+    {topic:"Level A2", type:"adj", vn:"phẳng", answer:"flat"},
+    {topic:"Level B1", type:"v", vn:"làm phẳng, san bằng", answer:"flatten"},
+    {topic:"Level B1", type:"n", vn:"cảng", answer:"port"},
+    {topic:"Level C1", type:"adj", vn:"không hư hại gì, an toàn", answer:"unscathed"},
+    {topic:"Level B1", type:"v", vn:"bao gồm", answer:"consist of"},
+    {topic:"Level B2", type:"n", vn:"chi tiêu (năng lượng, tiền bạc, thời gian)", answer:"expenditure"},
+    {topic:"Level A2", type:"v", vn:"quyết định", answer:"decide"},
+    {topic:"Level A2", type:"n", vn:"quyết định", answer:"decision"},
+    {topic:"Level B2", type:"adj", vn:"quyết đoán, dứt khoát", answer:"decisive"},
+    {topic:"Level B1", type:"phrase", vn:"theo như", answer:"according to"},
+    {topic:"Level B1", type:"n", vn:"triệu chứng", answer:"symptom"},
+    {topic:"Level B1", type:"adj", vn:"liên tục, không đổi", answer:"constant"},
+    {topic:"Level B1", type:"v", vn:"xử lý", answer:"process"},
+    {topic:"Level B1", type:"n", vn:"quy trình, quá trình", answer:"process"},
+    {topic:"Level B2", type:"adj", vn:"nhỏ nhặt, tầm thường", answer:"trivial"},
+    {topic:"Level B2", type:"combining form", vn:"thuộc tâm lý", answer:"psycho"},
+    {topic:"Level B2", type:"adj", vn:"thuộc về tâm lý", answer:"psychological"},
+    {topic:"Level B1", type:"phrase", vn:"thỉnh thoảng", answer:"from time to time"},
+    {topic:"Level C1", type:"v", vn:"gây đau khổ, ảnh hưởng xấu đến", answer:"afflict"},
+    {topic:"Level B2", type:"n", vn:"sự rối loạn, chứng rối loạn", answer:"disorder"},
+    {topic:"Level A2", type:"v", vn:"vẽ, thu hút, hoặc rút ra kết luận", answer:"draw"},
+    {topic:"Level A2", type:"adj", vn:"mù", answer:"blind"},
+    {topic:"Level B2", type:"n", vn:"sự mù lòa", answer:"blindness"},
+    {topic:"Level B2", type:"v", vn:"cảm nhận, nhận thức", answer:"perceive"},
+    {topic:"Level B1", type:"v", vn:"giám sát, theo dõi", answer:"monitor"},
+    {topic:"Level B1", type:"v", vn:"liên quan tới", answer:"relate"},
+    {topic:"Level B1", type:"adj", vn:"có liên quan", answer:"relevant"},
+    {topic:"Level B2", type:"adj", vn:"không liên quan", answer:"irrelevant"},
+    {topic:"Level B1", type:"adj", vn:"thông thái, khôn ngoan", answer:"wise"},
+    {topic:"Level B2", type:"n", vn:"trí khôn, sự khôn ngoan", answer:"wisdom"},
+    {topic:"Level B1", type:"v", vn:"đặt trước", answer:"reserve"},
+    {topic:"Level B1", type:"phrase", vn:"đặt chỗ trước", answer:"make a reservation"},
+    {topic:"Level B1", type:"phrase", vn:"trước, làm gì đó trước", answer:"in advance"},
+    {topic:"Level B1", type:"v", vn:"khởi hành", answer:"depart"},
+    {topic:"Level B1", type:"n", vn:"sự khởi hành", answer:"departure"},
+    {topic:"Level B1", type:"adj", vn:"tự chọn, không bắt buộc", answer:"optional"}
+  ];
+
+  function shuffle(arr){
+    var a = arr.slice();
+    for (var i = a.length - 1; i > 0; i--){
+      var j = Math.floor(Math.random() * (i + 1));
+      var t = a[i]; a[i] = a[j]; a[j] = t;
+    }
+    return a;
+  }
+
+  var gameQuestions = [];
+  var currentIndex = 0;
+  var score = 0;
+  var answered = false;
+  var topicScores = {};
+  var wrongAnswers = [];
+
+  var startScreen = document.getElementById('startScreen');
+  var quizScreen = document.getElementById('quizScreen');
+  var endScreen = document.getElementById('endScreen');
+  var startBtn = document.getElementById('startBtn');
+  var nameInput = document.getElementById('nameInput');
+  var quizNameValue = document.getElementById('quizNameValue');
+  var endNameValue = document.getElementById('endNameValue');
+  var nextBtn = document.getElementById('nextBtn');
+  var restartBtn = document.getElementById('restartBtn');
+  var soundCheck = document.getElementById('soundCheck');
+  var questionText = document.getElementById('questionText');
+  var answerInput = document.getElementById('answerInput');
+  var checkBtn = document.getElementById('checkBtn');
+  var correctAnswerReveal = document.getElementById('correctAnswerReveal');
+  var feedbackText = document.getElementById('feedbackText');
+  var questionCount = document.getElementById('questionCount');
+  var progressFill = document.getElementById('progressFill');
+  var scoreChip = document.getElementById('scoreChip');
+  var topicTag = document.getElementById('topicTag');
+  var wordTypeTag = document.getElementById('wordTypeTag');
+  var finalScore = document.getElementById('finalScore');
+  var finalMessage = document.getElementById('finalMessage');
+  var topicBreakdown = document.getElementById('topicBreakdown');
+  var reviewSection = document.getElementById('reviewSection');
+
+  var audioCtx = null;
+  function getAudioContext(){
+    if (!audioCtx){
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch(e){
+        audioCtx = null;
+      }
+    }
+    return audioCtx;
+  }
+
+  function playTone(freqs, durations, type){
+    if (!soundCheck.checked) return;
+    var ctx = getAudioContext();
+    if (!ctx) return;
+    var t = ctx.currentTime;
+    freqs.forEach(function(freq, i){
+      var osc = ctx.createOscillator();
+      var gain = ctx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, t);
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(0.18, t + 0.01);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + durations[i]);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + durations[i] + 0.02);
+      t += durations[i] * 0.85;
+    });
+  }
+
+  function playCorrectSound(){
+    playTone([523.25, 659.25, 783.99], [0.12, 0.12, 0.22], 'sine');
+  }
+
+  function playWrongSound(){
+    playTone([220, 174.6], [0.16, 0.28], 'sawtooth');
+  }
+
+  function normalize(text){
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, ' ')
+      .replace(/^(a |an |the )/, '')
+      .replace(/^-+|-+$/g, '')
+      .replace(/[.,!?]/g, '');
+  }
+
+  function levenshtein(a, b){
+    var m = a.length, n = b.length;
+    var d = [];
+    for (var i = 0; i <= m; i++){ d[i] = [i]; }
+    for (var j = 0; j <= n; j++){ d[0][j] = j; }
+    for (i = 1; i <= m; i++){
+      for (j = 1; j <= n; j++){
+        var cost = a[i - 1] === b[j - 1] ? 0 : 1;
+        d[i][j] = Math.min(
+          d[i - 1][j] + 1,
+          d[i][j - 1] + 1,
+          d[i - 1][j - 1] + cost
+        );
+      }
+    }
+    return d[m][n];
+  }
+
+  function isAnswerCorrect(userText, correctText){
+    var a = normalize(userText);
+    var b = normalize(correctText);
+    if (a === b) return true;
+    if (a.length === 0) return false;
+    var tolerance = b.length >= 10 ? 2 : (b.length >= 5 ? 1 : 0);
+    return levenshtein(a, b) <= tolerance;
+  }
+
+  var playerName = '';
+
+  function startQuiz(){
+    var typedName = nameInput.value.trim();
+    if (typedName.length === 0){
+      nameInput.focus();
+      return;
+    }
+    playerName = typedName;
+    quizNameValue.textContent = playerName;
+    endNameValue.textContent = playerName;
+
+    gameQuestions = shuffle(QUESTIONS).map(function(q){
+      return {
+        topic: q.topic,
+        type: q.type,
+        vn: q.vn,
+        answer: q.answer
+      };
+    });
+    currentIndex = 0;
+    score = 0;
+    topicScores = {};
+    wrongAnswers = [];
+    startScreen.style.display = 'none';
+    endScreen.style.display = 'none';
+    quizScreen.style.display = 'block';
+    renderQuestion();
+  }
+
+  function updateScoreChip(){
+    scoreChip.textContent = 'Score ' + score;
+  }
+
+  function renderQuestion(){
+    answered = false;
+    var q = gameQuestions[currentIndex];
+    questionCount.textContent = 'Question ' + (currentIndex + 1) + ' of ' + gameQuestions.length;
+    progressFill.style.width = (currentIndex / gameQuestions.length * 100) + '%';
+    topicTag.textContent = q.topic;
+    wordTypeTag.textContent = q.type;
+    questionText.innerHTML = 'What is the English word for ' + '<span class="vn">' + q.vn + '</span>' + '?';
+    feedbackText.textContent = '';
+    feedbackText.className = 'feedback';
+    correctAnswerReveal.textContent = '';
+    nextBtn.disabled = true;
+    updateScoreChip();
+
+    answerInput.value = '';
+    answerInput.disabled = false;
+    answerInput.className = 'answer-input';
+    checkBtn.disabled = false;
+    checkBtn.textContent = 'Check answer';
+    setTimeout(function(){ answerInput.focus(); }, 30);
+  }
+
+  function submitAnswer(){
+    if (answered) return;
+    var q = gameQuestions[currentIndex];
+    var typed = answerInput.value;
+    if (typed.trim().length === 0){
+      answerInput.focus();
+      return;
+    }
+    answered = true;
+    var isCorrect = isAnswerCorrect(typed, q.answer);
+
+    if (!topicScores[q.topic]) topicScores[q.topic] = {correct:0, total:0};
+    topicScores[q.topic].total += 1;
+
+    answerInput.disabled = true;
+    checkBtn.disabled = true;
+
+    if (isCorrect){
+      score += 1;
+      topicScores[q.topic].correct += 1;
+      answerInput.className = 'answer-input correct';
+      feedbackText.textContent = 'Correct. Nice work.';
+      feedbackText.className = 'feedback correct';
+      correctAnswerReveal.textContent = 'Correct word: ' + q.answer;
+      playCorrectSound();
+    } else {
+      answerInput.className = 'answer-input wrong';
+      feedbackText.textContent = 'Not quite.';
+      feedbackText.className = 'feedback wrong';
+      correctAnswerReveal.textContent = 'Correct word: ' + q.answer;
+      playWrongSound();
+      wrongAnswers.push({
+        vn: q.vn,
+        type: q.type,
+        typed: typed.trim(),
+        correct: q.answer
+      });
+    }
+
+    updateScoreChip();
+    nextBtn.disabled = false;
+    nextBtn.textContent = (currentIndex === gameQuestions.length - 1) ? 'See my results' : 'Next question';
+  }
+
+  function goNext(){
+    if (!answered) return;
+    currentIndex += 1;
+    if (currentIndex >= gameQuestions.length){
+      showResults();
+    } else {
+      renderQuestion();
+    }
+  }
+
+  function showResults(){
+    progressFill.style.width = '100%';
+    quizScreen.style.display = 'none';
+    endScreen.style.display = 'block';
+    finalScore.textContent = score + ' / ' + gameQuestions.length;
+
+    var pct = score / gameQuestions.length;
+    var message;
+    if (pct === 1){
+      message = 'Perfect score. You know this word list very well.';
+    } else if (pct >= 0.8){
+      message = 'Great job. Just a few words to review.';
+    } else if (pct >= 0.5){
+      message = 'Good effort. Keep practicing these words.';
+    } else {
+      message = 'Keep going. Review the word list and try again.';
+    }
+    finalMessage.textContent = message;
+
+    topicBreakdown.innerHTML = '';
+    Object.keys(topicScores).forEach(function(topic){
+      var row = document.createElement('div');
+      var t = topicScores[topic];
+      row.innerHTML = '<span>' + topic + '</span><span>' + t.correct + ' / ' + t.total + '</span>';
+      topicBreakdown.appendChild(row);
+    });
+
+    reviewSection.innerHTML = '';
+    if (wrongAnswers.length === 0){
+      var emptyMsg = document.createElement('p');
+      emptyMsg.className = 'review-empty';
+      emptyMsg.textContent = 'No mistakes this time. Well done.';
+      reviewSection.appendChild(emptyMsg);
+    } else {
+      var title = document.createElement('p');
+      title.className = 'review-title';
+      title.textContent = 'Review missed words';
+      reviewSection.appendChild(title);
+
+      wrongAnswers.forEach(function(item){
+        var card = document.createElement('div');
+        card.className = 'review-item';
+
+        var vnLine = document.createElement('div');
+        vnLine.className = 'review-vn';
+        vnLine.textContent = '(' + item.type + ') ' + item.vn;
+        card.appendChild(vnLine);
+
+        var answers = document.createElement('div');
+        answers.className = 'review-answers';
+
+        var yourSpan = document.createElement('span');
+        yourSpan.className = 'your-answer';
+        yourSpan.textContent = 'Your answer: ' + (item.typed.length ? item.typed : '(left blank)');
+        answers.appendChild(yourSpan);
+
+        var correctSpan = document.createElement('span');
+        correctSpan.className = 'correct-answer';
+        correctSpan.textContent = 'Correct answer: ' + item.correct;
+        answers.appendChild(correctSpan);
+
+        card.appendChild(answers);
+        reviewSection.appendChild(card);
+      });
+    }
+  }
+
+  startBtn.addEventListener('click', startQuiz);
+  nameInput.addEventListener('keydown', function(e){
+    if (e.key === 'Enter'){
+      e.preventDefault();
+      startQuiz();
+    }
+  });
+  checkBtn.addEventListener('click', submitAnswer);
+  answerInput.addEventListener('keydown', function(e){
+    if (e.key === 'Enter'){
+      e.preventDefault();
+      e.stopPropagation();
+      if (!answered){
+        submitAnswer();
+      } else if (!nextBtn.disabled){
+        goNext();
+      }
+    }
+  });
+  document.addEventListener('keydown', function(e){
+    if (e.key !== 'Enter') return;
+    if (quizScreen.style.display === 'none') return;
+    if (answered && !nextBtn.disabled){
+      e.preventDefault();
+      goNext();
+    }
+  });
+  nextBtn.addEventListener('click', goNext);
+  restartBtn.addEventListener('click', function(){
+    endScreen.style.display = 'none';
+    startScreen.style.display = 'block';
+  });
+
+})();
+</script>
+</body>
+</html>
